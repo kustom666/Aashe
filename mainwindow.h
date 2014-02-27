@@ -5,9 +5,10 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QTextStream>
+#include <QTextEdit>
+#include <QFont>
 
-#include <Qsci/qsciscintilla.h>
-#include <Qsci/qscilexercpp.h>
+#include "highlighters/cpphighlighter.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,7 +29,7 @@ public slots:
 
 private:
     Ui::MainWindow *ui;
-
+    QFont textFont;
 private:
     void readFile(const QString fileName);
 };
