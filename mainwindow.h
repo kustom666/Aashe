@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QTextStream>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QFont>
 #include <QDir>
 #include <QTreeWidget>
@@ -31,6 +31,7 @@ public slots:
     void newFile();
     void openFolder();
     void openFromTree(QTreeWidgetItem *item, int column);
+    void save();
 
 private:
     Ui::MainWindow *ui;
@@ -40,6 +41,9 @@ private:
 
 private:
     void readFile(const QString fileName);
+    void saveFile(QString path);
+    QPlainTextEdit* currentEditor();
+
 };
 
 #endif // MAINWINDOW_H
