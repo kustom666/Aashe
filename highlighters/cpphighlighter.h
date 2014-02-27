@@ -29,12 +29,27 @@ private:
     QTextCharFormat singleLineCommentFormat;
     QTextCharFormat functionsFormat;
     QTextCharFormat typesFormat;
+    QTextCharFormat quoteFormat;
+    QTextCharFormat numberFormat;
+    QTextCharFormat includeFormat;
+    QTextCharFormat chevronFormat;
+    QTextCharFormat templateFormat;
+    QTextCharFormat multiLineCommentFormat;
+
+    QRegExp commentStartExpression;
+    QRegExp commentEndExpression;
 
 private:
     void AddKeywordsRule();
     void AddFunctionsRule();
     void AddCommentsRule();
     void AddTypesRule();
+    void AddQuoteRule();
+    void AddNumberRule();
+    void AddIncludeRule();
+    void AddChevronsRule();
+    void AddTemplateRule();
+
 };
 
 #endif // CPPHIGHLIGHER_H

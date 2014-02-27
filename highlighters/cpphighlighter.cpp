@@ -1,11 +1,20 @@
 #include "cpphighlighter.h"
 
-CppHighlighter::CppHighlighter(QTextDocument *parent): QSyntaxHighlighter(parent)
+CppHighlighter::CppHighlighter(QTextDocument *parent): QSyntaxHighlighter(parent), commentStartExpression("/\\*"),
+                                                       commentEndExpression("\\*/")
 {
-    AddKeywordsRule();
+    // The order is important, it determines the union between rules
     AddFunctionsRule();
-    AddCommentsRule();
     AddTypesRule();
+    AddNumberRule();
+    AddQuoteRule();
+    AddIncludeRule();
+    AddChevronsRule();
+    AddTemplateRule();
+    AddKeywordsRule();
+    AddCommentsRule();
+
+    multiLineCommentFormat.setForeground(QColor(117,113,94));
 }
 
 void CppHighlighter::highlightBlock(const QString &text)
@@ -18,6 +27,26 @@ void CppHighlighter::highlightBlock(const QString &text)
              setFormat(index, length, rule.format);
              index = expression.indexIn(text, index + length);
          }
+     }
+
+    setCurrentBlockState(0);
+
+     int startIndex = 0;
+     if (previousBlockState() != 1)
+         startIndex = commentStartExpression.indexIn(text);
+
+     while (startIndex >= 0) {
+         int endIndex = commentEndExpression.indexIn(text, startIndex);
+         int commentLength;
+         if (endIndex == -1) {
+             setCurrentBlockState(1);
+             commentLength = text.length() - startIndex;
+         } else {
+             commentLength = endIndex - startIndex
+                             + commentEndExpression.matchedLength();
+         }
+         setFormat(startIndex, commentLength, multiLineCommentFormat);
+         startIndex = commentStartExpression.indexIn(text, startIndex + commentLength);
      }
 }
 
@@ -40,11 +69,56 @@ void CppHighlighter::AddFunctionsRule()
     Rules.append(bufferRule);
 }
 
+void CppHighlighter::AddQuoteRule()
+{
+     HighlightingRule bufferRule;
+     quoteFormat.setForeground(QColor(230,219,116));
+     bufferRule.pattern = QRegExp("\"([^\"']*)\"");
+     bufferRule.format = quoteFormat;
+     Rules.append(bufferRule);
+}
+
+void CppHighlighter::AddChevronsRule()
+{
+     HighlightingRule bufferRule;
+     chevronFormat.setForeground(QColor(230,219,116));
+     bufferRule.pattern = QRegExp("\\s<([^<']*)>");
+     bufferRule.format = chevronFormat;
+     Rules.append(bufferRule);
+}
+
+void CppHighlighter::AddTemplateRule()
+{
+     HighlightingRule bufferRule;
+     templateFormat.setForeground(QColor(102,217,239));
+     bufferRule.pattern = QRegExp("[A-Za-z]+<.*>");
+     bufferRule.format = templateFormat;
+     Rules.append(bufferRule);
+}
+
+void CppHighlighter::AddNumberRule()
+{
+     HighlightingRule bufferRule;
+     numberFormat.setForeground(QColor(174,129,255));
+     bufferRule.pattern = QRegExp("\\b[0-9]+");
+     bufferRule.format = numberFormat;
+     Rules.append(bufferRule);
+}
+
+void CppHighlighter::AddIncludeRule()
+{
+     HighlightingRule bufferRule;
+     includeFormat.setForeground(QColor(249,38,114));
+     bufferRule.pattern = QRegExp("\\#[A-Za-z]+\\b");
+     bufferRule.format = includeFormat;
+     Rules.append(bufferRule);
+}
+
 void CppHighlighter::AddKeywordsRule()
 {
     HighlightingRule bufferRule;
 
-    keywordFormat.setForeground(Qt::darkYellow);
+    keywordFormat.setForeground(QColor(249,38,114));
 
     QStringList bufferKeywords;
 
@@ -53,9 +127,9 @@ void CppHighlighter::AddKeywordsRule()
                      << "\\bfriend\\b" << "\\binline\\b"
                      << "\\bnamespace\\b" << "\\boperator\\b"
                      << "\\bprivate\\b" << "\\bprotected\\b" << "\\bpublic\\b"
-                     << "\\bsignals\\b"
+                     << "\\bsignals\\b" << "\\bcase\\b" << "\\bswitch\\b"
                      << "\\bslots\\b" << "\\bstatic\\b"
-                     << "\\bvirtual\\b"
+                     << "\\bvirtual\\b" << "\\bif\\b" << "\\belse\\b"
                      << "\\bvolatile\\b" << "\\bnew\\b" << "\\bdelete\\b"
                      << "\\bdelete[]\\b";
 
@@ -75,7 +149,7 @@ void CppHighlighter::AddTypesRule()
     QStringList bufferKeywords;
 
     bufferKeywords   << "\\bchar\\b" << "\\bclass\\b" << "\\bdouble\\b"
-                     << "\\benum\\b" << "\\bint\\b" << "\\blong\\b"
+                     << "\\benum\\b" << "\\bint\\b" << "\\blong\\b" << "\\bbool\\b"
                      << "\\bshort\\b" << "\\bsigned\\b" << "\\btypedef\\b"
                      << "\\bstruct\\b" << "\\btemplate\\b" << "\\btypename\\b"
                      << "\\bunsigned\\b" << "\\bunion\\b" << "\\bvoid\\b";
